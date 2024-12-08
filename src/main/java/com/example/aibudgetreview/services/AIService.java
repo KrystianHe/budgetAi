@@ -1,12 +1,14 @@
 package com.example.aibudgetreview.services;
 
 import com.example.aibudgetreview.dto.CategoryDTO;
-import com.example.aibudgetreview.dto.CategoryExpenseDTO;
+import com.example.aibudgetreview.dto.CategoryStatisticsDTO;
 import com.example.aibudgetreview.models.Category;
 import com.example.aibudgetreview.models.Transaction;
+import com.example.aibudgetreview.models.User;
 import com.example.aibudgetreview.models.enums.CategoryType;
 import com.example.aibudgetreview.repositories.CategoryRepository;
 import com.example.aibudgetreview.repositories.TransactionRepository;
+import com.example.aibudgetreview.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import weka.classifiers.Classifier;
@@ -14,33 +16,28 @@ import weka.classifiers.lazy.IBk;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
-public class AITransactionCategorizationService {
+public class AIService {
 
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
-    private TransactionRepository transactionRepository;
-
-    @Autowired
     private Classifier classifier;
     private Instances trainingData;
 
-    public AITransactionCategorizationService() throws Exception {
+    public AIService() throws Exception {
         this.classifier = new IBk();
         this.trainingData = loadTrainingData();
         trainModel();
     }
 
     private Instances loadTrainingData() throws Exception {
-        return new Instances(new java.io.FileReader("data/learning.arff"));
+        return new Instances(new java.io.FileReader("transactions.arff"));
+    }
+
+    private void trainModel() throws Exception {
+        classifier.buildClassifier(trainingData);
     }
 
     public CategoryDTO categorizeTransaction(Transaction transaction) {
@@ -49,7 +46,6 @@ public class AITransactionCategorizationService {
             instance.setValue(trainingData.attribute("description"), transaction.getDescription());
 
             var predictedClassIndex = classifier.classifyInstance(instance);
-
             String predictedCategoryName = trainingData.classAttribute().value((int) predictedClassIndex);
 
             Category category = categoryRepository.findByName(predictedCategoryName)
@@ -61,10 +57,4 @@ public class AITransactionCategorizationService {
             return new CategoryDTO(null, "Other", CategoryType.EXPENSE);
         }
     }
-    public void trainModel() throws Exception {
-        trainingData = loadTrainingData();
-        classifier.buildClassifier(trainingData);
-        System.out.println("Model retrained successfully.");
-    }
-
 }

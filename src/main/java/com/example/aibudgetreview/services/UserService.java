@@ -7,7 +7,10 @@ import com.example.aibudgetreview.utils.PasswordUtils;
 import com.example.aibudgetreview.utils.exceptions.EmailAlreadyRegisteredException;
 import com.example.aibudgetreview.utils.exceptions.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -42,4 +45,25 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public List<User> getAllUsers(Specification<User> specification) {
+        return userRepository.findAll(specification);
+    }
+
+    public User getUserById(Long id){
+        return userRepository.getUserById(id);
+    }
+
+
+    public User login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (PasswordUtils.matches(password, user.getPasswordHash())) {
+            return user;
+        } else {
+            throw new RuntimeException("Invalid password");
+        }
+    }
+
 }

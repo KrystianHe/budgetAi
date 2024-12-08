@@ -24,9 +24,6 @@ public class Category {
     @Column(nullable = false)
     private CategoryType type;  // 'income' or 'expense'
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 
     public Category(Object o, String other, CategoryType categoryType, Object o1) {
     }

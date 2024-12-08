@@ -8,10 +8,7 @@ import com.example.aibudgetreview.utils.exceptions.UsernameAlreadyExistsExceptio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -29,6 +26,30 @@ public class UserController {
             return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         }  catch (Exception ex) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserDTO user) {
+        try {
+            User updatedUser = userService.updateUser(id, user);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (UsernameAlreadyExistsException | EmailAlreadyRegisteredException ex) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestParam String username, @RequestParam String password) {
+        try {
+            User user = userService.login(username, password);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
     }
 }

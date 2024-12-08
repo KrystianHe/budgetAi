@@ -1,0 +1,12 @@
+@relation transactions
+
+@attribute description string
+@attribute category {Coffee,Transport,Shopping,Income,Groceries}
+
+@data
+"Starbucks Coffee",Coffee
+"Uber ride",Transport
+"Apple Store purchase",Shopping
+"Salary for November",Income
+"Freelance project payment",Income
+"Groceries at Lidl",Groceries
